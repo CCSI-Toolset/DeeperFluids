@@ -2,7 +2,7 @@
 
 This repository provides the code needed to build/apply/evaluate neural network surrogates that simulate the fluid dynamics of carbon capture systems relevant to carbon capture efficiency. It is the official codebase for the paper:
 
-* [Latent Space Simulation for Carbon Capture Design Optimization](arxiv.org). Brian Bartoldson, Rui Wang, Yucheng Fu, David Widemann, Sam Nguyen, Jie Bao, Zhijie Xu, and Brenda Ng. IAAI 2022.
+* [Latent Space Simulation for Carbon Capture Design Optimization](https://arxiv.org/abs/2112.11656). Brian Bartoldson, Rui Wang, Yucheng Fu, David Widemann, Sam Nguyen, Jie Bao, Zhijie Xu, and Brenda Ng. IAAI 2022.
 
 For questions about usage or contributing, please contact Brian: Bartoldson\[at\]llnl.gov.
 
@@ -32,9 +32,9 @@ Our surrogate simulation framework was inspired by Deep Fluids (Kim et al., 2019
 
 Deep Fluids (DF) performs surrogate simulation of CFD data using latent-space simulation. In particular, fields associated with simulations (e.g., a volume fraction or velocity field) are encoded into a latent space via an encoder network, temporally advance via a latent integration network (LIN), then decoded back to the field-space using a decoder network. We call the combination of encoder and decoder the latent vector model (LVM). 
 
-This framework adds functionality to this baseline DF approach. Specifically, it allows end-to-end training of the LVM and LIN (they are typically trained separately), it allows use of several new LVM and LIN architectures (such as a transformer for the LIN), and it allows modifications of several key hyperparameters. Additionally, it computes interfacial areas of simulated volume fraction fields, which may aid design of carbon capture systems.
+This framework adds functionality to this baseline DF approach. Specifically, it allows end-to-end training of the LVM and LIN (they are typically trained separately), it allows use of several new LVM and LIN architectures (such as a transformer for the LIN), and it allows modifications of several key hyperparameters. Additionally, it computes interfacial areas (IAs) of simulated volume fraction fields, which may aid design of carbon capture systems.
 
-![Latent space simulation.](https://www.scribd.com/document/548878155/surrogate)
+[![Latent space simulation.](https://imgur.com/coOAufN.png)](https://arxiv.org/abs/2112.11656)
 
 Currently, this framework has been tested only for single-channel (e.g., volume fraction) simulation, but it could be extended to
 multiple channel (e.g. velocity) data simulations with some additional testing/development.
