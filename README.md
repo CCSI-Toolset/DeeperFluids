@@ -1,5 +1,11 @@
 # Deeper Fluids: A library for customizing, training, and applying NN-based surrogates for CFD
 
+This repository provides the code needed to build/apply/evaluate neural network surrogates that simulate the fluid dynamics of carbon capture systems relevant to carbon capture efficiency. It is the official codebase for the paper:
+
+* [Latent Space Simulation for Carbon Capture Design Optimization](https://arxiv.org/abs/2112.11656). Brian Bartoldson, Rui Wang, Yucheng Fu, David Widemann, Sam Nguyen, Jie Bao, Zhijie Xu, and Brenda Ng. IAAI 2022.
+
+For questions about usage or contributing, please contact Brian: Bartoldson\[at\]llnl.gov.
+
 ## Table of Contents
 
 ### [1 Overview](#overview)
@@ -14,10 +20,10 @@
 
 ### 1.1 Purpose
 
-Our surrogate simulation approach was inspired by Deep Fluids (Kim et al., 2019). This framework is designed with five goals in mind:
+Our surrogate simulation framework was inspired by Deep Fluids (Kim et al., 2019) and was designed with five goals in mind:
 
 1. To train neural networks on CFD simulation data.
-2. To run experiments that build on those in Kim et al., 2019. (E.g., end-to-end training.)
+2. To run experiments that build on those in Kim et al., 2019. (E.g., evaluate the effect of end-to-end training.)
 3. To automatically track and manage experimental progress and results.
 4. To allow users to add new datasets, models, and other modifications.
 5. To make it easy to apply existing/trained models to new datasets.
@@ -26,7 +32,9 @@ Our surrogate simulation approach was inspired by Deep Fluids (Kim et al., 2019)
 
 Deep Fluids (DF) performs surrogate simulation of CFD data using latent-space simulation. In particular, fields associated with simulations (e.g., a volume fraction or velocity field) are encoded into a latent space via an encoder network, temporally advance via a latent integration network (LIN), then decoded back to the field-space using a decoder network. We call the combination of encoder and decoder the latent vector model (LVM). 
 
-This framework adds functionality to this baseline DF approach. Specifically, it allows end-to-end training of the LVM and LIN (they are typically trained separately), it allows use of several new LVM and LIN architectures (such as a transformer for the LIN), and it allows modifications of several key hyperparameters. 
+This framework adds functionality to this baseline DF approach. Specifically, it allows end-to-end training of the LVM and LIN (they are typically trained separately), it allows use of several new LVM and LIN architectures (such as a transformer for the LIN), and it allows modifications of several key hyperparameters. Additionally, it computes interfacial areas (IAs) of simulated volume fraction fields, which may aid design of carbon capture systems.
+
+[![Latent space simulation.](https://imgur.com/coOAufN.png)](https://arxiv.org/abs/2112.11656)
 
 Currently, this framework has been tested only for single-channel (e.g., volume fraction) simulation, but it could be extended to
 multiple channel (e.g. velocity) data simulations with some additional testing/development.
@@ -55,7 +63,7 @@ multiple channel (e.g. velocity) data simulations with some additional testing/d
     * compute interfacial area (IA) at timestep `T`
     * return this final IA and save decoded embeddings (i.e., the surrogate simulation)
 
-### 2.2 Arguments 
+### <a name=args></a> 2.2 Arguments
 `DF.py` expects the following arguments:
 
 * `LVM`: path to a trained latent vector model (pytorch files)
@@ -64,9 +72,9 @@ multiple channel (e.g. velocity) data simulations with some additional testing/d
 * `solvent_inlet_velocity`: solvent inlet velocity of desired surrogate simulation
 * `T`: number of timesteps of desired surrogate simulation
 
-Note that, currently, `DF.py` assumes the following:
-1. The LVM's folder also holds the latent vectors of the data the LVM was trained on in a file called 'latent_vectors.pth'.
-2. The LIN's folder also holds the hyperparameters associated with the LIN+LVM in a file called 'hyperparameters.log'.
+In addition to the `LVM`, `LIN`, and `init_data` files, please note that `DF.py` assumes the following two data files exist and are discoverable as follows (i.e., five data files in total are needed to use `DF.py`):
+1. `latent_vectors.pth` should be inside the LVM's folder (`data/lv_aacc5cb236ada1913d2855d2bd26289a/0/` in the [example](#example)); these are the latent vectors of the data the LVM was trained on.
+2. `hyperparameters.log` should be inside the LIN's folder (`data/lin_0c76f4c763f197a67351bde3a52d2e5f/0/` in the [example](#example)); this file holds the hyperparameters associated with the LIN+LVM training and models.
 
 (Note that using [`experiments.py`](#training) will automatically create LVM and LIN folders and store these latent vector and hyperparameter files in the correct locations.)
         
@@ -82,12 +90,14 @@ Note that `predict()` saves the surrogate-simulated frames as a .pth file inside
 
 Note that we assume point-cloud data given to `DF.py` will not have been standardized/preprocessed, and thus the models used/loaded by `DF.py` should have been trained with `lv_standardize=False` (the default behavior). 
             
-### 2.4 Example
+### <a name=example></a> 2.4 Example
 
-To simulate for 500 timesteps with the solvent inlet velocity at 0.002:
+Here we provide an illustration of how to run a surrogate simulation with this repository and trained models. If you haven't trained any models yet, you can still run this example using the example files in `example_data_for_tests.gz` in the assets section of the 1.0.0 Release of this repository (note the `init_data` file is included in the repository and does not need to be downloaded separately).
+
+To simulate for 500 timesteps with the solvent inlet velocity at 0.002, ensure the five required files are discoverable by placing them in their appropriate directories (see [the arguments section](#args)) and run:
 
 ```
-python DF.py --LVM=data/lv_c49da55ff41fe509b00b35c8b28e172d/0/best_latent_vector_model.pth --LIN=data/lin_a91f54e91cc7cefd872a2cab572f79f4/0/best_lin_model.pth --init_data=data/raw/001/XYZ_Internal_Table_table_10.csv --T=500 --solvent_inlet_velocity=0.002 
+python DF.py --LVM=data/lv_aacc5cb236ada1913d2855d2bd26289a/0/best_latent_vector_model.pth --LIN=data/lin_0c76f4c763f197a67351bde3a52d2e5f/0/best_lin_model.pth --init_data=data/raw/001/XYZ_Internal_Table_table_10.csv --T=500 --solvent_inlet_velocity=0.002 
 ```
 
 The above command will cause `DF.py` to load the point-cloud data "data/raw/001/XYZ_Internal_Table_table_10.csv", convert it to a uniform grid, embed this grid into a latent vector, add current timestep and solvent inlet velocity information to that vector, use the LIN to temporally advance that latent vector for 499 (`T`-1) timesteps, decode those 499 latent vectors into predicted grid data for each simulation timestep, save those grids, compute the IA associated with the grid at timestep `T`, then return this IA.
