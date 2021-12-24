@@ -92,7 +92,7 @@ Note that we assume point-cloud data given to `DF.py` will not have been standar
             
 ### <a name=example></a> 2.4 Example
 
-Here we provide an illustration of how to run a surrogate simulation with this repository and trained models. If you haven't trained any models yet, you can still run this example using the example files in `example_data_for_tests.gz` in the assets section of the 1.0.0 Release of this repository (note the `init_data` file is included in the repository and does not need to be downloaded separately).
+Here we provide an illustration of how to run a surrogate simulation with this repository and trained models. If you haven't trained any models yet, you can still run this example using the example files in [`example_data_for_tests.tar.gz`](../../releases/download/1.0.0/example_data_for_tests.tar.gz) in the assets section of the 1.0.0 Release of this repository (note the `init_data` file is included in the repository and does not need to be downloaded separately).
 
 To simulate for 500 timesteps with the solvent inlet velocity at 0.002, ensure the five required files are discoverable by placing them in their appropriate directories (see [the arguments section](#args)) and run:
 
